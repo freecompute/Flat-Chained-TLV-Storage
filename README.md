@@ -8,15 +8,13 @@ This paper proposes Flat-Chained TLV (FCT), a lightweight, non-relational binary
 2. Core Architecture
 2.1 Binary Data Unit (TLV)
 
-Each data block follows a strict Type-Length-Value (TLV) format to ensure binary safety and sequential access:
+Each data block follows a strict Type-Length-Value (TLV) format to ensure binary safety and minimize overhead:
 
-    Type (1 byte): Defines data category (Text, Image, Metadata, or Extension).
+Type (1 byte): Defines data category (Text, Image, Metadata, etc.).
+Length (4 bytes): 32-bit unsigned integer defining the value size.
+Value (N bytes): Raw payload data.
 
-    Timestamp (8 bytes): 64-bit integer for temporal ordering.
-
-    Length (4 bytes): 32-bit unsigned integer defining the value size.
-
-    Value (N bytes): Raw payload data.
+*Note: Temporal information is not mandated at the protocol level. It can be implemented as a specific metadata-type block or managed by the filesystem's modification time to achieve the smallest possible header overhead.*
 
 2.2 Physical Segmentation (The Hard-Limit)
 
@@ -47,12 +45,15 @@ To prevent performance degradation (the "branch-of-branch" problem), FCT enforce
 
 4. Implementation Goals
 
-    Deterministic Write IO: Updates only affect the targeted branch file, significantly reducing write amplification on Flash storage.
-
-    Zero-Index Memory Footprint: No external B-Tree or WAL files are required.
-
-    GPU-Ready Streaming: Compatible with DirectX/OpenGL vertex and texture streaming for 60fps+ UI performance on legacy hardware (e.g., Android 4.4/KitKat).
+- Deterministic Write IO: Updates only affect the targeted branch file, significantly reducing write amplification on Flash storage.
+- Zero-Index Memory Footprint: No external B-Tree or WAL files are required, making it ideal for low-RAM environments.
+- High Streaming Efficiency: The flat-chained structure allows for sequential data streaming and easy integration with memory-mapped file (mmap) access for rapid data loading.
 
 5. Defensive Statement
 
-The FCT protocol is designed for data sovereignty and offline-first applications. This specification is publicly disclosed to establish prior art, preventing the patenting of similar chain-linked filename-based indexing and flat-branching storage methods by third parties.
+The FCT protocol is designed for data sovereignty and offline-first applications. This specification is publicly disclosed as of April 2026 to establish prior art. The scope of this disclosure includes, but is not limited to:
+- The filename-based logic chain mechanism (ID.n.dat).
+- The flat branching strategy to prevent recursive nesting.
+- The method of localized re-writes of physical segments to handle logical updates.
+
+This disclosure aims to ensure the freedom for any developer to implement, modify, and distribute systems based on these concepts without fear of patent encumbrance from third parties.
